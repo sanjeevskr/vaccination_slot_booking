@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="jumbotron centered">
+    <h1 class="display-3">ADMIN</h1>
+
+
+    <form action="/submit" method="POST">
+      <div class="form-group">
+        <table class="table table-bordered table-hover dt-responsive">
+          <p class="secret-text">Enter student details</p>
+          <tbody>
+            <tr>
+              <input class="form-control text-center" type="text" name="rollno" placeholder="Roll Number">
+              <input class="form-control text-center" type="text" name="sname" placeholder="Student Name">
+              <input class="form-control text-center" type="text" name="rnumber" placeholder="Register Number">
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-dark">Submit</button>
+    </form>
+
+
+  </div>
+</div>
+<%- include('partials/footer') %>
