@@ -1,0 +1,44 @@
+<%- include('partials/header') %>
+<h1 class="middle">Dosage details</h1>
+<div class="container">
+      <div class="row">
+        <div class="col-xs-12">
+          <table class="table table-bordered table-hover dt-responsive tablemobile">
+
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Dosage</th>
+                <th>Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if(list.length===0){ %>
+              <tr>
+                <td>.... </td>
+                <td>.... </td>
+                <td>.... </td>
+                <td>.... </td>
+              </tr>
+                <h1>No slots booked<h1>
+              <%}else{%>
+
+                <%for(var i=0;i<list.length;i++){ %>
+
+                  <tr>
+                    <td><%= list[i].Name%></td>
+                    <td><%= list[i].Age%></td>
+                    <td><%= list[i].Dosage%></td>
+                    <td><%= list[i].Location %></td>
+                  </tr>
+
+                <%}%>
+              <%}%>
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+<%- include('partials/footer') %>

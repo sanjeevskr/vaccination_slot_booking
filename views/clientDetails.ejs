@@ -1,0 +1,26 @@
+<%- include('partials/header') %>
+
+<div class="container">
+  <div class="jumbotron centered">
+    <h1 class="display-3">ADMIN</h1>
+
+    <form action="/clientDetails" method="POST">
+      <div class="form-group">
+        <table class="table table-bordered table-hover dt-responsive">
+          <p class="secret-text">Enter your details</p>
+          <tbody>
+            <tr>
+              <input class="form-control text-center" type="text" name="Name" placeholder="Enter your name">
+              <input class="form-control text-center" type="text" name="Age" placeholder="Enter your age">
+              <input class="form-control text-center" type="text" name="Dosage" placeholder="No of dosages">
+              <input class="form-control text-center" type="text" name="Location" placeholder="Location">
+
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button type="submit" class="btn btn-dark">Submit</button>
+    </form>
+  </div>
+</div>
+<%- include('partials/footer') %>
