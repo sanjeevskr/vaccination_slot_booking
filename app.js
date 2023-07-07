@@ -7,7 +7,6 @@ var session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const _=require("lodash");
-const LocalStrategy = require('passport-local').Strategy;
 
 
 const app = express();
@@ -72,15 +71,20 @@ userSchema.plugin(passportLocalMongoose);
 adminSchema.plugin(passportLocalMongoose);
 const Admin = mongoose.model("Admin", adminSchema)
 const User = mongoose.model("User", userSchema)
+
+
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(function(user, done) {
+  done(null, user.id);
+});
 
-passport.use(Admin.createStrategy());
+passport.deserializeUser(function(id, done) {
+  User.findById(id, function(err, user) {
+    done(err, user);
+  });
+});
 
-passport.serializeUser(Admin.serializeUser());
-passport.deserializeUser(Admin.deserializeUser());
 
 app.get("/", function(req, res) {
   res.render("home");
@@ -93,34 +97,42 @@ app.get("/register", function(req, res) {
 });
 
 app.get("/secrets", function(req, res) {
-  if (req.isAuthenticated()) {
-
-      AdminUpdation.find({
-
-      }, function(err, adminUpdatedItems) {
-        if (!err) {
-
-          res.render("secrets", {
-            adminUpdatedItemList: adminUpdatedItems
-          })
-        } else {
-          console.log(err);
+    User.find({"secret": {$ne: null}}, function(err, foundUsers){
+      if (err){
+        console.log(err);
+      } else {
+        if (foundUsers) {
+            AdminUpdation.find({}, function(err, adminUpdatedItems) {
+              if (!err) {
+                res.render("secrets", {adminUpdatedItemList: adminUpdatedItems})
+              } else {
+                console.log(err);
+              }
+            });
         }
-      });
+      }
+    });
+  });
 
-  } else {
-    res.redirect("/login");
-  }
-});
+
+  //
+  // } else {
+  //   res.redirect("/login");
+  // }
+// });
 
 
 
 
 app.get("/submit", function(req, res) {
-    res.render("submit");
+  if (req.isAuthenticated()){
+  res.render("submit");
+  } else {
+  res.redirect("/Adminlog");
+  }
 });
 app.get("/ADMIN", function(req, res) {
-
+  if (req.isAuthenticated()){
     clientlist.find({
 
     }, function(err, list) {
@@ -132,26 +144,42 @@ app.get("/ADMIN", function(req, res) {
         console.log(err);
       }
     });
+  } else {
+    res.redirect("/login");
+  }
+
 });
 
 app.post("/submit", function(req, res) {
-
   let vc=_.capitalize(req.body.vaccinationCenterName);
   let sw=_.capitalize(req.body.Start_WorkingHour);
   let ew=_.capitalize(req.body.End_workingHour);
-  if(vc!=''&&sw!=''&&ew!=''){
-    var countPerDayData = {
-      count: 0
-    };
+  var countPerDayData = {
+    count: 0
+  };
   var AdminUpdation_new = new AdminUpdation({
     vaccinationCenterName: vc,
     Start_WorkingHour: sw,
     End_workingHour: ew,
     countPerDay:countPerDayData
   });
-  AdminUpdation_new.save();
-  res.redirect("/submit");
-}
+  User.findById(req.user.id, function(err, foundUser){
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+          if(vc!=''&&sw!=''&&ew!=''){
+          AdminUpdation_new.save();
+          res.redirect("/submit");
+          }
+          else{
+            console.log("got null");
+          }
+        }
+      }
+    })
+  // });
+
 
 });
 
@@ -169,18 +197,30 @@ app.get("/Adminlog",function(req,res){
 
 
 app.post("/Adminreg",function(req,res){
-  Admin.register({
-    username: req.body.username
-  }, req.body.password, function(err, user) {
+  // Admin.register({
+  //   username: req.body.username
+  // }, req.body.password, function(err, user) {
+  //   if (err) {
+  //     console.log(err);
+  //     res.redirect("/Adminlog");
+  //   } else {
+  //     passport.authenticate("local")(req, res, function() {
+  //       res.redirect("/submit");
+  //     });
+  //   }
+  // })
+
+  User.register({username: req.body.username}, req.body.password, function(err, user){
     if (err) {
       console.log(err);
       res.redirect("/Adminlog");
     } else {
-      passport.authenticate("local")(req, res, function() {
+      passport.authenticate("local")(req, res, function(){
         res.redirect("/submit");
       });
     }
-  })
+  });
+
 });
 
 app.get("/Adminreg",function(req,res){
