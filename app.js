@@ -199,7 +199,7 @@ app.post("/submit", function(req, res) {
       console.log(err);
     } else {
       if (foundUser) {
-          if(f!=''||p!=''||d!=''||t!=''){
+          if(vc!=''||sw!=''||ew!=''){
           AdminUpdation_new.save();
           res.redirect("/submit");
           }
