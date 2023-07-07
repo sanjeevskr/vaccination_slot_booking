@@ -251,16 +251,12 @@ app.post('/secrets/:paramName',async (req, res) => {
 
     const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
     if (existingDocument==null) {
-      await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
-
+    await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
       console.log(existingDocument);
-    } else {
+    }
+    else{
       const update = { $inc: { 'countPerDay.count': 1 } };
-      const updatedDocument = await AdminUpdation.findOneAndUpdate(
-        { 'countPerDay.day': currentDay },
-        update,
-        { new: true }
-      );
+      const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
     }
 
 
