@@ -217,7 +217,7 @@ else{
       console.log(err);
     } else {
       if (foundUser) {
-          if(f!=''||p!=''||d!=''||t!=''){
+           if(vc!=''||sw!=''||ew!=''){
             AdminUpdation.deleteOne({vaccinationCenterName: vc}, function(err) {
             if (err) {
               console.error(err);
