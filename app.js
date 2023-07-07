@@ -180,20 +180,18 @@ app.get("/ADMIN", function(req, res) {
 // });
 
 app.post("/submit", function(req, res) {
-  let f=_.capitalize(req.body.flight);
-  let p=_.capitalize(req.body.path);
-  let d=_.capitalize(req.body.date);
-  let t=_.capitalize(req.body.time);
+  let vc=_.capitalize(req.body.vaccinationCenterName);
+  let sw=_.capitalize(req.body.Start_WorkingHour);
+  let ew=_.capitalize(req.body.End_workingHour);
   var countPerDayData = {
     count: 0
   };
   const submitBtn = req.body.submitBtn;
   if(submitBtn==='add'){
   var AdminUpdation_new = new AdminUpdation({
-    flight: f,
-    path: p,
-    date: d,
-    time: t,
+    vaccinationCenterName: vc,
+    Start_WorkingHour: sw,
+    End_workingHour: ew,
     countPerDay:countPerDayData
   });
   User.findById(req.user.id, function(err, foundUser){
@@ -220,7 +218,7 @@ else{
     } else {
       if (foundUser) {
           if(f!=''||p!=''||d!=''||t!=''){
-            AdminUpdation.deleteOne({ flight: f }, function(err) {
+            AdminUpdation.deleteOne({vaccinationCenterName: vc}, function(err) {
             if (err) {
               console.error(err);
             } else {
