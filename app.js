@@ -146,17 +146,54 @@ app.get("/ADMIN", function(req, res) {
 
 });
 
+// app.post("/submit", function(req, res) {
+//   let vc=_.capitalize(req.body.vaccinationCenterName);
+//   let sw=_.capitalize(req.body.Start_WorkingHour);
+//   let ew=_.capitalize(req.body.End_workingHour);
+//   var countPerDayData = {
+//     count: 0
+//   };
+//   var AdminUpdation_new = new AdminUpdation({
+//     vaccinationCenterName: vc,
+//     Start_WorkingHour: sw,
+//     End_workingHour: ew,
+//     countPerDay:countPerDayData
+//   });
+//   User.findById(req.user.id, function(err, foundUser){
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       if (foundUser) {
+//           if(vc!=''&&sw!=''&&ew!=''){
+//           AdminUpdation_new.save();
+//           res.redirect("/submit");
+//           }
+//           else{
+//             console.log("got null");
+//           }
+//         }
+//       }
+//     })
+//   // });
+
+
+// });
+
 app.post("/submit", function(req, res) {
-  let vc=_.capitalize(req.body.vaccinationCenterName);
-  let sw=_.capitalize(req.body.Start_WorkingHour);
-  let ew=_.capitalize(req.body.End_workingHour);
+  let f=_.capitalize(req.body.flight);
+  let p=_.capitalize(req.body.path);
+  let d=_.capitalize(req.body.date);
+  let t=_.capitalize(req.body.time);
   var countPerDayData = {
     count: 0
   };
+  const submitBtn = req.body.submitBtn;
+  if(submitBtn==='add'){
   var AdminUpdation_new = new AdminUpdation({
-    vaccinationCenterName: vc,
-    Start_WorkingHour: sw,
-    End_workingHour: ew,
+    flight: f,
+    path: p,
+    date: d,
+    time: t,
     countPerDay:countPerDayData
   });
   User.findById(req.user.id, function(err, foundUser){
@@ -164,7 +201,7 @@ app.post("/submit", function(req, res) {
       console.log(err);
     } else {
       if (foundUser) {
-          if(vc!=''&&sw!=''&&ew!=''){
+          if(f!=''||p!=''||d!=''||t!=''){
           AdminUpdation_new.save();
           res.redirect("/submit");
           }
@@ -175,9 +212,36 @@ app.post("/submit", function(req, res) {
       }
     })
   // });
+}
+else{
+  User.findById(req.user.id, function(err, foundUser){
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+          if(f!=''||p!=''||d!=''||t!=''){
+            AdminUpdation.deleteOne({ flight: f }, function(err) {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log('Element deleted successfully');
+            }
+          });
+          res.redirect("/submit");
+          }
+          else{
+            console.log("got null");
+          }
+        }
+      }
+    })
+
+}
 
 
 });
+
+
 
 
 
