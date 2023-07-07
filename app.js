@@ -250,8 +250,9 @@ app.post('/secrets/:paramName',async (req, res) => {
     console.log(customParamName);
 
     const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
-    if (!existingDocument) {
-      await AdminUpdation.updateMany({}, { 'countPerDay.count': 0 });
+    if (existingDocument==null) {
+      await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
+
       console.log(existingDocument);
     } else {
       const update = { $inc: { 'countPerDay.count': 1 } };
@@ -275,6 +276,14 @@ app.post('/secrets/:paramName',async (req, res) => {
 
 
 });
+
+
+
+
+
+
+
+
 
 app.get('/booked',async (req, res) => {
   if (req.isAuthenticated()) {
