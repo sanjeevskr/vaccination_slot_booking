@@ -63,13 +63,9 @@ const userSchema = new mongoose.Schema({
   password: String
 });
 
-const adminSchema = new mongoose.Schema({
-  email:String,
-  Password: String
-});
+
 userSchema.plugin(passportLocalMongoose);
-adminSchema.plugin(passportLocalMongoose);
-const Admin = mongoose.model("Admin", adminSchema)
+
 const User = mongoose.model("User", userSchema)
 
 
@@ -197,18 +193,6 @@ app.get("/Adminlog",function(req,res){
 
 
 app.post("/Adminreg",function(req,res){
-  // Admin.register({
-  //   username: req.body.username
-  // }, req.body.password, function(err, user) {
-  //   if (err) {
-  //     console.log(err);
-  //     res.redirect("/Adminlog");
-  //   } else {
-  //     passport.authenticate("local")(req, res, function() {
-  //       res.redirect("/submit");
-  //     });
-  //   }
-  // })
 
   User.register({username: req.body.username}, req.body.password, function(err, user){
     if (err) {
@@ -266,7 +250,7 @@ app.post('/secrets/:paramName',async (req, res) => {
     console.log(customParamName);
 
     const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
-    if (existingDocument!=null) {
+    if (existingDocument==null) {
     await AdminUpdation.updateMany({}, { 'countPerDay.count': 0 });
       console.log(existingDocument);
     }
