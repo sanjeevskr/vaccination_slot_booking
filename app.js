@@ -104,7 +104,7 @@ app.get("/secrets", function(req, res) {
             });
      
     }
-    } else {
+    else {
     res.redirect("/login");
   }
   });
