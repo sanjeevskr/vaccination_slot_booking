@@ -10,6 +10,7 @@
       <div class="form-group">
         <table class="table table-bordered table-hover dt-responsive">
           <p class="secret-text">Add vaccination center</p>
+          <p>For removing just fill vaccinationCenterName</p>
           <tbody>
             <tr>
               <input class="form-control text-center" type="text" name="vaccinationCenterName" placeholder="vaccinationCenterName">
@@ -19,7 +20,9 @@
           </tbody>
         </table>
       </div>
-      <button type="submit" class="btn btn-dark">Submit</button>
+      <button type="submit" class="btn btn-dark" name="submitBtn" value="add">ADD</button>
+      <button type="submit" class="btn btn-dark" name="submitBtn" value="remove">REMOVE</button>
+
       <a href="/ADMIN"><button class="btn btn-light btn-lg" type="button" name="button">View dosage details</button></a>
 
     </form>

@@ -10,7 +10,8 @@
                 <th>Name</th>
                 <th>Age</th>
                 <th>Dosage</th>
-                <th>Location</th>
+                <th>Center</th>
+                <th>Time</th>
               </tr>
             </thead>
             <tbody>
@@ -30,7 +31,8 @@
                     <td><%= list[i].Name%></td>
                     <td><%= list[i].Age%></td>
                     <td><%= list[i].Dosage%></td>
-                    <td><%= list[i].Location %></td>
+                    <td><%= list[i].vaccinationCenterName %></td>
+                    <td><%= list[i].Start_WorkingHour %> - <%= list[i].End_workingHour %></td>
                   </tr>
 
                 <%}%>

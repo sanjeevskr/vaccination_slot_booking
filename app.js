@@ -7,7 +7,7 @@ var session = require("express-session");
 const passport = require("passport");
 const passportLocalMongoose = require("passport-local-mongoose");
 const _=require("lodash");
-
+const cron = require('node-cron');
 
 const app = express();
 
@@ -34,7 +34,10 @@ const clientdetails = {
   Name: String,
   Age: String,
   Dosage: String,
-  Location: String
+  Location: String,
+  vaccinationCenterName:String,
+  Start_WorkingHour:String,
+  End_workingHour:String
 };
 
 
@@ -62,7 +65,11 @@ const userSchema = new mongoose.Schema({
   email: String,
   password: String
 });
-
+const adminSchema = new mongoose.Schema({
+  email: String,
+  password: String
+});
+const Admin = mongoose.model("Admin", adminSchema);
 
 userSchema.plugin(passportLocalMongoose);
 
@@ -111,80 +118,99 @@ app.get("/secrets", function(req, res) {
   });
 
 
-  //
-  // } else {
-  //   res.redirect("/login");
-  // }
-// });
-
-
 
 
 app.get("/submit", function(req, res) {
-  if (req.isAuthenticated()){
-  res.render("submit");
+  if (req.session.adminId) {
+    res.render("submit");
   } else {
-  res.redirect("/Adminlog");
+    res.redirect("/Adminlog");
   }
 });
-app.get("/ADMIN", function(req, res) {
-  if (req.isAuthenticated()){
-    clientlist.find({
 
-    }, function(err, list) {
+app.get("/ADMIN", function(req, res) {
+  if (req.session.adminId) {
+    clientlist.find({}, function(err, list) {
       if (!err) {
         res.render("ADMIN", {
-          list: list,
-        })
+          list: list
+        });
       } else {
         console.log(err);
+        res.redirect("/login");
       }
     });
   } else {
-    res.redirect("/login");
+    res.redirect("/Adminlog");
   }
-
 });
+
 
 app.post("/submit", function(req, res) {
-  let vc=_.capitalize(req.body.vaccinationCenterName);
-  let sw=_.capitalize(req.body.Start_WorkingHour);
-  let ew=_.capitalize(req.body.End_workingHour);
-  var countPerDayData = {
+  let vc = _.capitalize(req.body.vaccinationCenterName);
+  let sw = _.capitalize(req.body.Start_WorkingHour);
+  let ew = _.capitalize(req.body.End_workingHour);
+  const countPerDayData = {
     count: 0
   };
-  var AdminUpdation_new = new AdminUpdation({
-    vaccinationCenterName: vc,
-    Start_WorkingHour: sw,
-    End_workingHour: ew,
-    countPerDay:countPerDayData
-  });
-  User.findById(req.user.id, function(err, foundUser){
+  const submitBtn = req.body.submitBtn;
+
+  if (submitBtn === "add") {
+    var AdminUpdation_new = new AdminUpdation({
+      vaccinationCenterName: vc,
+      Start_WorkingHour: sw,
+      End_workingHour: ew,
+      countPerDay: countPerDayData
+    });
+
+    if (req.session.adminId) {
+      newAdminUpdation.save();
+      res.redirect("/submit");
+    } else {
+      res.redirect("/Adminlog");
+    }
+  } else {
+    if (req.session.adminId) {
+      AdminUpdation.deleteOne({ vaccinationCenterName: vc }, function(err) {
+        if (err) {
+          console.error(err);
+        } else {
+          console.log('Element deleted successfully');
+        }
+      });
+      res.redirect("/submit");
+    } else {
+      res.redirect("/Adminlog");
+    }
+  }
+});
+
+
+app.post("/Adminlog", function(req, res) {
+  const email = req.body.username;
+  const password = req.body.password;
+
+
+  Admin.findOne({ email: email }, function(err, foundAdmin) {
     if (err) {
       console.log(err);
+      res.redirect("/Adminlog");
     } else {
-      if (foundUser) {
-          if(vc!=''&&sw!=''&&ew!=''){
-          AdminUpdation_new.save();
+      if (foundAdmin) {
+
+        if (foundAdmin.password === password) {
+
+          req.session.adminId = foundAdmin._id;
           res.redirect("/submit");
-          }
-          else{
-            console.log("got null");
-          }
+        } else {
+          res.redirect("/Adminlog");
         }
+      } else {
+        res.redirect("/Adminlog");
       }
-    })
-  // });
-
-
+    }
+  });
 });
-
-
-
-app.post("/Adminlog", passport.authenticate("local", { failureRedirect: "/Adminlog" }), function(req, res) {
-  res.redirect("/submit");
-});
-
 
 
 app.get("/Adminlog",function(req,res){
@@ -192,20 +218,41 @@ app.get("/Adminlog",function(req,res){
 });
 
 
-app.post("/Adminreg",function(req,res){
+app.post("/Adminreg", function(req, res) {
+  const email = req.body.username;
+  const password = req.body.password;
+  console.log(email);
+  console.log(password);
 
-  User.register({username: req.body.username}, req.body.password, function(err, user){
+  Admin.findOne({ email: email }, function(err, foundAdmin) {
     if (err) {
       console.log(err);
       res.redirect("/Adminlog");
     } else {
-      passport.authenticate("local")(req, res, function(){
-        res.redirect("/submit");
-      });
+      if (foundAdmin) {
+        res.redirect("/Adminlog");
+      } else {
+        const newAdmin = new Admin({
+          email: email,
+          password: password
+        });
+
+        newAdmin.save(function(err) {
+          if (err) {
+            console.log(err);
+            res.redirect("/Adminlog");
+          } else {
+            req.session.adminId = newAdmin._id;
+            res.redirect("/submit");
+          }
+        });
+      }
     }
   });
-
 });
+
+
+
 
 app.get("/Adminreg",function(req,res){
   res.render("Adminreg");
@@ -219,7 +266,8 @@ app.get("/clientDetails", function(req, res) {
   }
 });
 app.post("/clientDetails", function(req, res) {
-
+  if (req.isAuthenticated()) {
+  const { param1, param2, param3} = req.session.clientDetails;
   let cn=_.capitalize(req.body.Name);
   let ca=_.capitalize(req.body.Age);
   let cd=_.capitalize(req.body.Dosage);
@@ -229,17 +277,20 @@ app.post("/clientDetails", function(req, res) {
     Name: cn,
     Age: ca,
     Dosage: cd,
-    Location: cl
+    Location: cl,
+    vaccinationCenterName:param1,
+    Start_WorkingHour:param2,
+    End_workingHour:param3
   });
+    new_clientlist.save();
+  }
 
-  new_clientlist.save();
 }
 
   res.redirect("/booked");
 });
 
-
-app.post('/secrets/:paramName',async (req, res) => {
+app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
   if (req.isAuthenticated()) {
   try {
     const currentDate = new Date();
@@ -259,7 +310,26 @@ app.post('/secrets/:paramName',async (req, res) => {
       const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
     }
 
+    const param1=customParamName;
+    const param2=_.capitalize(req.params.param2);
+    const param3=_.capitalize(req.params.param3);
+    cron.schedule('0 0 * * *', async () => {
+      const currentDate = new Date();
+      const currentDay = currentDate.toISOString().split('T')[0];
 
+      try {
+        const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
+        if (existingDocument == null) {
+          await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
+          console.log('Day field updated for all documents.');
+        } else {
+          console.log('Day field is already up to date.');
+        }
+      } catch (error) {
+        console.error('Error updating day field:', error);
+      }
+    });
+    req.session.clientDetails = { param1, param2, param3 };
 
       res.redirect('/clientdetails');
   } catch (error) {
@@ -274,13 +344,6 @@ app.post('/secrets/:paramName',async (req, res) => {
 });
 
 
-
-
-
-
-
-
-
 app.get('/booked',async (req, res) => {
   if (req.isAuthenticated()) {
   res.render('booked');
@@ -290,7 +353,10 @@ app.get('/booked',async (req, res) => {
 
 app.get("/logout", function(req, res) {
   req.logout();
-  res.redirect("/")
+  if(req.session.adminId!=null){
+    req.session.adminId = null;
+  }
+  res.redirect("/");
 });
 
 
