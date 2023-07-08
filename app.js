@@ -100,11 +100,8 @@ app.get("/register", function(req, res) {
 });
 
 app.get("/secrets", function(req, res) {
-    User.find({"secret": {$ne: null}}, function(err, foundUsers){
-      if (err){
-        console.log(err);
-      } else {
-        if (foundUsers) {
+  if (req.isAuthenticated()) {
+
             AdminUpdation.find({}, function(err, adminUpdatedItems) {
               if (!err) {
                 res.render("secrets", {adminUpdatedItemList: adminUpdatedItems})
@@ -112,9 +109,11 @@ app.get("/secrets", function(req, res) {
                 console.log(err);
               }
             });
-        }
-      }
-    });
+     
+    }
+    else {
+    res.redirect("/login");
+  }
   });
 
 
@@ -145,6 +144,41 @@ app.get("/ADMIN", function(req, res) {
   }
 });
 
+<<<<<<< HEAD
+=======
+// app.post("/submit", function(req, res) {
+//   let vc=_.capitalize(req.body.vaccinationCenterName);
+//   let sw=_.capitalize(req.body.Start_WorkingHour);
+//   let ew=_.capitalize(req.body.End_workingHour);
+//   var countPerDayData = {
+//     count: 0
+//   };
+//   var AdminUpdation_new = new AdminUpdation({
+//     vaccinationCenterName: vc,
+//     Start_WorkingHour: sw,
+//     End_workingHour: ew,
+//     countPerDay:countPerDayData
+//   });
+//   User.findById(req.user.id, function(err, foundUser){
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       if (foundUser) {
+//           if(vc!=''&&sw!=''&&ew!=''){
+//           AdminUpdation_new.save();
+//           res.redirect("/submit");
+//           }
+//           else{
+//             console.log("got null");
+//           }
+//         }
+//       }
+//     })
+//   // });
+
+
+// });
+>>>>>>> 41a7ea44946725a0cfd8120064d3e9df5028bed3
 
 app.post("/submit", function(req, res) {
   let vc = _.capitalize(req.body.vaccinationCenterName);
@@ -154,6 +188,7 @@ app.post("/submit", function(req, res) {
     count: 0
   };
   const submitBtn = req.body.submitBtn;
+<<<<<<< HEAD
 
   if (submitBtn === "add") {
     var AdminUpdation_new = new AdminUpdation({
@@ -192,15 +227,31 @@ app.post("/Adminlog", function(req, res) {
 
 
   Admin.findOne({ email: email }, function(err, foundAdmin) {
+=======
+  if(submitBtn==='add'){
+  var AdminUpdation_new = new AdminUpdation({
+    vaccinationCenterName: vc,
+    Start_WorkingHour: sw,
+    End_workingHour: ew,
+    countPerDay:countPerDayData
+  });
+  User.findById(req.user.id, function(err, foundUser){
+>>>>>>> 41a7ea44946725a0cfd8120064d3e9df5028bed3
     if (err) {
       console.log(err);
       res.redirect("/Adminlog");
     } else {
+<<<<<<< HEAD
       if (foundAdmin) {
 
         if (foundAdmin.password === password) {
 
           req.session.adminId = foundAdmin._id;
+=======
+      if (foundUser) {
+          if(vc!=''||sw!=''||ew!=''){
+          AdminUpdation_new.save();
+>>>>>>> 41a7ea44946725a0cfd8120064d3e9df5028bed3
           res.redirect("/submit");
         } else {
           res.redirect("/Adminlog");
@@ -208,11 +259,55 @@ app.post("/Adminlog", function(req, res) {
       } else {
         res.redirect("/Adminlog");
       }
+<<<<<<< HEAD
     }
   });
 });
 
 
+=======
+    })
+  // });
+}
+else{
+  User.findById(req.user.id, function(err, foundUser){
+    if (err) {
+      console.log(err);
+    } else {
+      if (foundUser) {
+           if(vc!=''||sw!=''||ew!=''){
+            AdminUpdation.deleteOne({vaccinationCenterName: vc}, function(err) {
+            if (err) {
+              console.error(err);
+            } else {
+              console.log('Element deleted successfully');
+            }
+          });
+          res.redirect("/submit");
+          }
+          else{
+            console.log("got null");
+          }
+        }
+      }
+    })
+
+}
+
+
+});
+
+
+
+
+
+app.post("/Adminlog", passport.authenticate("local", { failureRedirect: "/Adminlog" }), function(req, res) {
+  res.redirect("/submit");
+});
+
+
+
+>>>>>>> 41a7ea44946725a0cfd8120064d3e9df5028bed3
 app.get("/Adminlog",function(req,res){
     res.render("Adminlog");
 });
