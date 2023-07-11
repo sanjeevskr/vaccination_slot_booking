@@ -99,6 +99,23 @@ app.get("/register", function(req, res) {
   res.render("register");
 });
 
+cron.schedule('0 0 * * *', async () => {
+  const currentDate = new Date();
+  const currentDay = currentDate.toISOString().split('T')[0];
+
+  try {
+    const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
+    if (existingDocument == null) {
+      await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
+      console.log('Day field updated for all documents.');
+    } else {
+      console.log('Day field is already up to date.');
+    }
+  } catch (error) {
+    console.error('Error updating day field:', error);
+  }
+});
+
 app.get("/secrets", function(req, res) {
     User.find({"secret": {$ne: null}}, function(err, foundUsers){
       if (err){
@@ -311,22 +328,7 @@ app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
     const param1=customParamName;
     const param2=_.capitalize(req.params.param2);
     const param3=_.capitalize(req.params.param3);
-    cron.schedule('0 0 * * *', async () => {
-      const currentDate = new Date();
-      const currentDay = currentDate.toISOString().split('T')[0];
 
-      try {
-        const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
-        if (existingDocument == null) {
-          await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
-          console.log('Day field updated for all documents.');
-        } else {
-          console.log('Day field is already up to date.');
-        }
-      } catch (error) {
-        console.error('Error updating day field:', error);
-      }
-    });
     req.session.clientDetails = { param1, param2, param3 };
 
       res.redirect('/clientdetails');
