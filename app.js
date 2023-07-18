@@ -319,10 +319,10 @@ app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
     await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
       console.log(existingDocument);
     }
-    else{
+ 
       const update = { $inc: { 'countPerDay.count': 1 } };
       const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
-    }
+
 
 
     const param1=customParamName;
