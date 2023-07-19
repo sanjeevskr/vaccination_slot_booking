@@ -104,13 +104,13 @@ cron.schedule('0 0 * * *', async () => {
   const currentDay = currentDate.toISOString().split('T')[0];
 
   try {
-    const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
-    if (existingDocument == null) {
+    // const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
+    // if (existingDocument == null) {
       await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
       console.log('Day field updated for all documents.');
-    } else {
-      console.log('Day field is already up to date.');
-    }
+    // } else {
+    //   console.log('Day field is already up to date.');
+    // }
   } catch (error) {
     console.error('Error updating day field:', error);
   }
