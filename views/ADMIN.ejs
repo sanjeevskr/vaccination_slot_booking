@@ -3,7 +3,10 @@
 <div class="container">
       <div class="row">
         <div class="col-xs-12">
-          <table class="table table-bordered table-hover dt-responsive tablemobile">
+          <div class="search-bar">
+            <input type="text" id="searchInput2" placeholder="Search (Name or Time)" />
+          </div>
+          <table id="clientTable" class="table table-bordered table-hover dt-responsive tablemobile">
 
             <thead>
               <tr>
@@ -43,4 +46,24 @@
         </div>
       </div>
     </div>
+    <script>
+      $(document).ready(function() {
+        $('#searchInput2').on('input', filterTable2);
+
+        function filterTable2() {
+          var searchQuery = $('#searchInput2').val().toLowerCase();
+          $('#clientTable tbody tr').each(function() {
+            var centerName = $(this).find('td:nth-child(4)').text().toLowerCase();
+            if (centerName.includes(searchQuery) ) {
+              $(this).show();
+            } else {
+              $(this).hide();
+            }
+          });
+        }
+
+        $('#searchInput2').on('input', filterTable2);
+      });
+    </script>
+
 <%- include('partials/footer') %>
