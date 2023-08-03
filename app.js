@@ -98,22 +98,17 @@ app.get("/register", function(req, res) {
   res.render("register");
 });
 
-<<<<<<< HEAD
-cron.schedule('45 10 * * *', async () => {
-=======
+
+
 cron.schedule('0 0 * * *', async () => {
->>>>>>> 4d72e963b7711315af236619219ca595c0b79900
   const currentDate = new Date();
   const currentDay = currentDate.toISOString().split('T')[0];
 
   try {
-<<<<<<< HEAD
   //   const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
   //   if (existingDocument == null) {
-=======
     // const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
     // if (existingDocument == null) {
->>>>>>> 4d72e963b7711315af236619219ca595c0b79900
       await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
       console.log('Day field updated for all documents.');
     // } else {
@@ -124,10 +119,7 @@ cron.schedule('0 0 * * *', async () => {
   }
 });
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 4d72e963b7711315af236619219ca595c0b79900
 app.get("/secrets", function(req, res) {
     User.find({"secret": {$ne: null}}, function(err, foundUsers){
       if (err){
@@ -339,7 +331,6 @@ app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
     console.log(req.params.paramName);
     console.log(customParamName);
 
-<<<<<<< HEAD
     // const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
     // if (existingDocument==null) {
     // await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
@@ -348,16 +339,14 @@ app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
     //
     //   const update = { $inc: { 'countPerDay.count': 1 } };
     //   const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
-=======
     const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
     if (existingDocument==null) {
     await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
       console.log(existingDocument);
     }
- 
+
       const update = { $inc: { 'countPerDay.count': 1 } };
       const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
->>>>>>> 4d72e963b7711315af236619219ca595c0b79900
 
 
 
