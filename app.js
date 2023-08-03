@@ -26,9 +26,8 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
-
-mongoose.connect(process.env.mongodblink);
-
+console.log(process.env.USER);
+mongoose.connect(`mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.uo8dv.mongodb.net/vaccinationBooking?retryWrites=true&w=majority`);
 
 const clientdetails = {
   Name: String,
