@@ -321,8 +321,9 @@ app.post("/clientDetails",async function(req, res) {
 app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
   if (req.isAuthenticated()) {
   try {
-    // const currentDate = new Date();
-    // const currentDay = currentDate.toISOString().split('T')[0];
+    const currentDate = new Date();
+    const currentDay = currentDate.toISOString().split('T')[0];
+
 
     customParamName=_.capitalize(req.params.paramName);
     console.log(req.params.paramName);
