@@ -1,4 +1,5 @@
 //jshint esversion:6
+require('dotenv').config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const ejs = require("ejs");
@@ -19,15 +20,14 @@ app.use(bodyParser.urlencoded({
 app.use(express.static("public"));
 
 app.use(session({
-  secret: "out little secret.",
+  secret: process.env.key,
   resave: false,
   saveUninitialized: false
 }));
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.connect("mongodb+srv://admin-sanjeev:test123@cluster0.uo8dv.mongodb.net/vaccinationBooking?retryWrites=true&w=majority");
-
+mongoose.connect(process.env.mongodblink);
 
 
 const clientdetails = {
@@ -39,8 +39,6 @@ const clientdetails = {
   Start_WorkingHour:String,
   End_workingHour:String
 };
-
-
 
 
 const clientlist = mongoose.model("clientlist",clientdetails);
@@ -57,6 +55,7 @@ const vaccination_Center = {
   End_workingHour: String,
   countPerDay: countPerDaySchema,
 };
+
 var number=0;
 const countPerDay = mongoose.model("countPerDay", countPerDaySchema);
 const AdminUpdation = mongoose.model("AdminUpdation", vaccination_Center);
@@ -98,6 +97,24 @@ app.get("/login", function(req, res) {
 app.get("/register", function(req, res) {
   res.render("register");
 });
+
+cron.schedule('45 10 * * *', async () => {
+  const currentDate = new Date();
+  const currentDay = currentDate.toISOString().split('T')[0];
+
+  try {
+  //   const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
+  //   if (existingDocument == null) {
+      await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
+      console.log('Day field updated for all documents.');
+    // } else {
+    //   console.log('Day field is already up to date.');
+    // }
+  } catch (error) {
+    console.error('Error updating day field:', error);
+  }
+});
+
 
 app.get("/secrets", function(req, res) {
     User.find({"secret": {$ne: null}}, function(err, foundUsers){
@@ -262,7 +279,7 @@ app.get("/clientDetails", function(req, res) {
   }
 });
 
-app.post("/clientDetails", function(req, res) {
+app.post("/clientDetails",async function(req, res) {
   if (req.isAuthenticated()) {
   const { param1, param2, param3} = req.session.clientDetails;
   let cn=_.capitalize(req.body.Name);
@@ -280,6 +297,19 @@ app.post("/clientDetails", function(req, res) {
     End_workingHour:param3
   });
     new_clientlist.save();
+
+    const currentDate = new Date();
+    const currentDay = currentDate.toISOString().split('T')[0];
+
+    const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
+    if (existingDocument==null) {
+    await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
+      console.log(existingDocument);
+    }
+
+      const update = { $inc: { 'countPerDay.count': 1 } };
+      const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
+
   }
 
 }
@@ -290,46 +320,31 @@ app.post("/clientDetails", function(req, res) {
 app.post('/secrets/:paramName/:param2/:param3',async (req, res) => {
   if (req.isAuthenticated()) {
   try {
-    const currentDate = new Date();
-    const currentDay = currentDate.toISOString().split('T')[0];
+    // const currentDate = new Date();
+    // const currentDay = currentDate.toISOString().split('T')[0];
 
     customParamName=_.capitalize(req.params.paramName);
     console.log(req.params.paramName);
     console.log(customParamName);
 
-    const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
-    if (existingDocument==null) {
-    await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
-      console.log(existingDocument);
-    }
-    else{
-      const update = { $inc: { 'countPerDay.count': 1 } };
-      const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
-    }
+    // const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
+    // if (existingDocument==null) {
+    // await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
+    //   console.log(existingDocument);
+    // }
+    //
+    //   const update = { $inc: { 'countPerDay.count': 1 } };
+    //   const updatedDocument = await AdminUpdation.findOneAndUpdate( { vaccinationCenterName: customParamName }, update, { new: true });
+
 
 
     const param1=customParamName;
     const param2=_.capitalize(req.params.param2);
     const param3=_.capitalize(req.params.param3);
-    cron.schedule('0 0 * * *', async () => {
-      const currentDate = new Date();
-      const currentDay = currentDate.toISOString().split('T')[0];
 
-      try {
-        const existingDocument = await AdminUpdation.findOne({ 'countPerDay.day': currentDay });
-        if (existingDocument == null) {
-          await AdminUpdation.updateMany({}, { $set: { 'countPerDay.day': currentDay, 'countPerDay.count': 0 } });
-          console.log('Day field updated for all documents.');
-        } else {
-          console.log('Day field is already up to date.');
-        }
-      } catch (error) {
-        console.error('Error updating day field:', error);
-      }
-    });
     req.session.clientDetails = { param1, param2, param3 };
 
-      res.redirect('/clientdetails');
+      res.redirect('/clientDetails');
   } catch (error) {
     console.error('Error updating count:', error);
     res.status(500).send('An error occurred');
@@ -388,8 +403,6 @@ app.post("/login", function(req, res) {
       })
     }
   });
-
-
 
 });
 
