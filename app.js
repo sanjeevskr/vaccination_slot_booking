@@ -98,9 +98,7 @@ app.get("/register", function(req, res) {
   res.render("register");
 });
 
-
-
-cron.schedule('0 0 * * *', async () => {
+cron.schedule('0 1 * * *', async () => {
   const currentDate = new Date();
   const currentDay = currentDate.toISOString().split('T')[0];
 
